@@ -8,23 +8,23 @@ std::vector<Przeszkody> ustaw_przeszkody(const int weight, const int height)
 {
     std::vector<Przeszkody> asteroidy;
     for (int j=0; j<100; j++) {
-        for (int i=0; i<5; i++) {
-            sf::Vector2f size(weight/20, height/5);
-            sf::Vector2f position(100+std::rand()%600*i, -200*j+10*i );
+        for (int i=0; i<2; i++) {
+            sf::Vector2f size(weight/10, height/4);
+            sf::Vector2f position(100+std::rand()%weight, -200*j+10*i );
             asteroidy.emplace_back(Przeszkody(size, position));
         }
     }
     for (auto &as : asteroidy) {
         as.setFillColor(sf::Color(100, 100, 100));
         as.setBounds(0, weight, 0, height);
-        as.setSpeed(std::rand()%22-std::rand()%11, 100, (std::rand()%22-std::rand()%11)/10);
+        as.setSpeed(std::rand()%22-std::rand()%11, 100, 0);
     }
     return asteroidy;
 }
 Statek ustaw_statek(const int weight, const int height)
 {
     sf::Vector2f size(weight/20, weight/15);
-    sf::Vector2f position(weight/2,height-50);
+    sf::Vector2f position(weight/2,height-100);
     Statek kosmiczny(size,position);
     kosmiczny.setBounds(0,weight,0,height);
     return kosmiczny;
@@ -41,7 +41,7 @@ int main()
     window.setFramerateLimit(60);
 
     auto asteroidy = ustaw_przeszkody(window_weight,window_height);
-    auto statek = ustaw_statek(window_weight,window_height);
+    auto kosmiczny = ustaw_statek(window_weight,window_height);
 
     while (window.isOpen()) {
     //EVENTS
@@ -51,28 +51,43 @@ int main()
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 window.close();
-            if (event.type == sf::Event::KeyReleased) {
-                    if (event.key.code == sf::Keyboard::Space) {
-                        std::cout << "Space released" << std::endl;
-                    }
-                }
-
-            if (event.type == sf::Event::MouseButtonPressed) {
-                if(event.mouseButton.button == sf::Mouse::Left) {
-                }
-            }
 
         }
     //LOGIC
-        for (auto as:asteroidy){
+        sf::FloatRect statek = kosmiczny.getGlobalBounds();
+        for (auto as : asteroidy){
+            sf::FloatRect asteroida = as.getGlobalBounds();
 
+            if (statek.top >= asteroida.top && statek.top <= asteroida.top+asteroida.height &&
+                statek.left >= asteroida.left && statek.left <= asteroida.left+asteroida.width)
+            {
+                kosmiczny.kolizja("top_left");
+                std::cout<<"KOLIZJA lewy gorny!!!"<<std::endl;
+            }
+            if (statek.top >= asteroida.top && statek.top <= asteroida.top+asteroida.height &&
+                statek.left+statek.width >= asteroida.left && statek.left+statek.width<=asteroida.left+asteroida.width)
+            {
+                kosmiczny.kolizja("top_right");
+                std::cout<<"KOLIZJA prawy gorny!!!"<<std::endl;
+            }
+            if (statek.top+statek.height >= asteroida.top && statek.top+statek.height <= asteroida.top+asteroida.height &&
+                statek.left >= asteroida.left && statek.left <= asteroida.left+asteroida.width)
+{
+                kosmiczny.kolizja("bot_left");
+                std::cout<<"KOLIZJA lewy dolny!!!"<<std::endl;
+            }
+            if (statek.top+statek.height >= asteroida.top && statek.top+statek.height <= asteroida.top+asteroida.height &&
+                statek.left+statek.width >= asteroida.left && statek.left+statek.width<=asteroida.left+asteroida.width)
+            {
+                kosmiczny.kolizja("bot_right");
+                std::cout<<"KOLIZJA prawy dolny!!!"<<std::endl;
+            }
         }
-
         sf::Time elapsed = clock.restart();
         for (auto &as : asteroidy) {
            as.animate(elapsed);
         }
-        statek.animate(elapsed);
+        kosmiczny.animate(elapsed);
 
     //DRAW
 
@@ -80,7 +95,7 @@ int main()
         for (auto &as : asteroidy) {
            window.draw(as);
         }
-        window.draw(statek);
+        window.draw(kosmiczny);
         window.display();
     }
 

@@ -19,5 +19,4 @@ private:
     int right=0;
     int top=0;
     int bot=0;
-
 };
