@@ -4,7 +4,7 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-        Przeszkody.cpp \
+        Obiekty.cpp \
         Statek.cpp \
         main.cpp
 
@@ -17,5 +17,5 @@ CONFIG(debug, debug|release){
 }
 
 HEADERS += \
-    Przeszkody.h \
+    Obiekty.h \
     Statek.h

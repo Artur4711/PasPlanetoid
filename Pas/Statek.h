@@ -1,18 +1,15 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include <Przeszkody.h>
+#include <Obiekty.h>
 
-
-class Statek : public sf::RectangleShape
+class Statek : public Obiekty
 {
 public:
     Statek(sf::Vector2f size,sf::Vector2f position);
-    void setSpeed(int vel_x,int vel_y, int vel_r);
     void animate(const sf::Time &elapse);
-    void setBounds(int left,int right,int top, int bot);
+    void setBounds(int left,int right,int top, int bot); //nadpisana identyczna metoda żeby działało
     void kolizja(std::string where);
-    void brak_kolizji();
 private:
     void bounce();
     int vel_x_=0;

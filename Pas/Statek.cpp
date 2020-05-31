@@ -1,19 +1,16 @@
 #include "Statek.h"
+#include "iostream"
 
 Statek::Statek(sf::Vector2f size, sf::Vector2f position)
 {
     setSize(size);
     setPosition(position);
 }
-void Statek::setSpeed(int vel_x,int vel_y, int vel_r)
-{
-    vel_r_=vel_r;   vel_x_=vel_x;   vel_y_=vel_y;
-}
 void Statek::animate(const sf::Time &elapsed)
 {
-
     if(!(top_left||top_right||bot_left||bot_right)){
         sf::FloatRect statek = getGlobalBounds();
+
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up)&&this->top<=statek.top) {
             move(0,-200*elapsed.asSeconds());
         }
@@ -27,7 +24,7 @@ void Statek::animate(const sf::Time &elapsed)
             move(200*elapsed.asSeconds(),0);
         }
     }
-    else{
+    else{//Reakcje statku na kolizję
         if(top_right&&bot_right){
             move(-2000*elapsed.asSeconds(),0);
             top_right=false;
@@ -66,7 +63,7 @@ void Statek::animate(const sf::Time &elapsed)
     }
     bounce();
 }
-void Statek::setBounds(int left,int right,int top, int bot)
+void Statek::setBounds(int left,int right,int top, int bot)   //nadpisana identyczna metoda żeby działało
 {
     this->left = left;   this->right = right;
     this->top = top;     this->bot = bot;
@@ -89,12 +86,6 @@ void Statek::kolizja(std::string where)
     if (where == "top_right") top_right=true;
     if (where == "bot_left") bot_left=true;
     if (where == "bot_right") bot_right=true;
-}
-void Statek::brak_kolizji(){
-     top_left = false;
-     top_right = false;
-     bot_left = false;
-     bot_right = false;
 }
 
 
