@@ -10,7 +10,7 @@ public:
     void setSpeed(int vel_x,int vel_y, int vel_r);
     void animate(const sf::Time &elapse);
     void setBounds(int left,int right,int top, int bot);
-private:
+protected:
     void bounce();
     int vel_x_=0;
     int vel_y_=0;
