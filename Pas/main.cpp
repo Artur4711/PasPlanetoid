@@ -1,106 +1,140 @@
-#include <SFML/Window.hpp>
-#include <SFML/Graphics.hpp>
-#include <iostream>
 #include <Obiekty.h>
 #include <Statek.h>
 
+int HEIGHT=1080;
+int WIDTH=1920;
+
+std::map <std::string,sf::Image*> Images;
+std::map<std::string,sf::Texture*> Textures;
+std::map<std::string,sf::VertexArray> beginCollisionPointsOfTextures;
+std::list <Obiekty*> Rockets;
+std::list <Obiekty*> Asteroidy;
+sf::VertexArray Gwiazdy(sf::PrimitiveType::Points,2000);
 
 
-std::vector<Obiekty*> ustaw_przeszkody(const int weight, const int height)
+void ustaw_przeszkody()
 {
-    std::vector<Obiekty*> asteroidy;
-    for (int j=0; j<100; j++) {
-        for (int i=0; i<2; i++) {
-            sf::Vector2f size(weight/10, height/4);
-            sf::Vector2f position(-50+std::rand()%(weight+100), -200*j+10*i );
-            asteroidy.emplace_back(new Obiekty(size, position));
+    for (int j=0; j<200; j++) {
+        for (int i=0; i<3; i++) {
+            Asteroidy.push_back(new Obiekty("asteroida.png",Images,Textures,beginCollisionPointsOfTextures));
+            Asteroidy.back()->setBounds(0,WIDTH,0,HEIGHT);
+            Asteroidy.back()->setSpeed(std::rand()%80-40,80,std::rand()%100-50);
+            Asteroidy.back()->setScale(1.0f + (rand()%41)/100.0 , 1.0f + (rand()%41)/100.0);
+            Asteroidy.back()->setPosition(-50+std::rand()%(HEIGHT+100),-200*j+100*i );
+            Asteroidy.back()->setColor(sf::Color(rand()%255,rand()%255,rand()%255,255));
         }
     }
-    for (auto &as : asteroidy) {
-
-        as->setFillColor(sf::Color(100, 100, 100));
-        as->setBounds(0, weight, 0, height);
-        as->setSpeed(std::rand()%22-std::rand()%11, 100,0);
+    //gwiazdy
+    for (auto i = 0u; i<Gwiazdy.getVertexCount(); i++) {
+        Gwiazdy[i].position = sf::Vector2f(rand()%WIDTH,rand()%HEIGHT);
+        Gwiazdy[i].color = sf::Color(rand()%156+100,rand()%156+100,rand()%156+100,255);
     }
-    return asteroidy;
 }
-Statek ustaw_statek(const int weight, const int height)
+Statek ustaw_statek()
 {
-    sf::Vector2f size(weight/20, weight/15);
-    sf::Vector2f position(weight/2,height-100);
-    Statek kosmiczny(size,position);
-    kosmiczny.setBounds(0,weight,0,height);
-    return kosmiczny;
+    Statek statek("statek.png",Images, Textures,beginCollisionPointsOfTextures);
+    statek.setPosition(WIDTH/2,HEIGHT-100);
+    statek.setScale(0.6,0.6);
+    statek.setBounds(0,WIDTH,0,HEIGHT);
+    return statek;
 }
-void obsluga_kolizji(Statek &statek,std::vector<Obiekty*> asteroidy)
+void kolizje(Statek &kosmiczny)
 {
-    sf::FloatRect statek_b = statek.getGlobalBounds();
-    for (auto as : asteroidy){
+    sf::FloatRect statek_b = kosmiczny.getGlobalBounds();
+    for (auto as : Asteroidy){
         sf::FloatRect asteroida = as->getGlobalBounds();
         if (statek_b.top >= asteroida.top && statek_b.top <= asteroida.top+asteroida.height &&
             statek_b.left >= asteroida.left && statek_b.left <= asteroida.left+asteroida.width)
         {
-            statek.top_left=true;
-            //std::cout<<"KOLIZJA lewy gorny!!!"<<std::endl;
+            kosmiczny.top_left=true;
         }
         if (statek_b.top >= asteroida.top && statek_b.top <= asteroida.top+asteroida.height &&
             statek_b.left+statek_b.width >= asteroida.left && statek_b.left+statek_b.width<=asteroida.left+asteroida.width)
         {
-            statek.top_right=true;
-            //std::cout<<"KOLIZJA prawy gorny!!!"<<std::endl;
+            kosmiczny.top_right=true;
         }
         if (statek_b.top+statek_b.height >= asteroida.top && statek_b.top+statek_b.height <= asteroida.top+asteroida.height &&
             statek_b.left >= asteroida.left && statek_b.left <= asteroida.left+asteroida.width)
         {
-            statek.bot_left=true;
-            //std::cout<<"KOLIZJA lewy dolny!!!"<<std::endl;
+            kosmiczny.bot_left=true;
         }
         if (statek_b.top+statek_b.height >= asteroida.top && statek_b.top+statek_b.height <= asteroida.top+asteroida.height &&
             statek_b.left+statek_b.width >= asteroida.left && statek_b.left+statek_b.width<=asteroida.left+asteroida.width)
         {
-            statek.bot_right=true;
-            //std::cout<<"KOLIZJA prawy dolny!!!"<<std::endl;
+            kosmiczny.bot_right=true;
         }
     }
 }
 int main()
 {
 
-    sf::Clock clock;
-    int window_height = 600;    int window_weight = 800;
-    auto asteroidy = ustaw_przeszkody(window_weight,window_height);
-    auto kosmiczny = ustaw_statek(window_weight,window_height);
-
-    sf::RenderWindow window(sf::VideoMode(window_weight, window_height), "Pas planetoid");
+    sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Pas planetoid");
     window.setFramerateLimit(60);
+    window.setKeyRepeatEnabled(false);
+    window.setVerticalSyncEnabled(true);
+    window.setPosition(sf::Vector2i(0,0));
 
+    sf::Clock clock;
+    std::map<int,bool> status;
+
+    ustaw_przeszkody();
+    auto kosmiczny = ustaw_statek();
+
+    sf::Event event;
     while (window.isOpen()) {
 
     //EVENTS
-
-        sf::Event event;
         while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
-                window.close();
-        }
-    //LOGIC
+            if (event.type == sf::Event::Closed || (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape) )) window.close();
+            if (event.type==sf::Event::KeyPressed) status[event.key.code]=true;
+            if (event.type==sf::Event::KeyReleased)status[event.key.code]=false;
 
-        obsluga_kolizji(kosmiczny,asteroidy);
-        sf::Time elapsed = clock.restart();
-        for (auto &as : asteroidy) {
-           as->animate(elapsed);
+            kosmiczny.eventAnalysis(event,Rockets,Images,Textures,beginCollisionPointsOfTextures);
         }
-        kosmiczny.animate(elapsed);
+
+    //LOGIC
+        sf::Time elapsed = clock.restart();
+        window.clear(sf::Color(20,20,50));
+        kolizje(kosmiczny);
+        kosmiczny.animate(elapsed,status,Asteroidy);
+        for(auto i=0; i<Gwiazdy.getVertexCount();i++)
+        {
+            Gwiazdy[i].position.y+=1;
+            if(Gwiazdy[i].position.y>HEIGHT)
+            {
+                Gwiazdy[i].position.y=0;
+            }
+        }
 
     //DRAW
-
-        window.clear(sf::Color::Black);
-        window.draw(kosmiczny);
-        for (auto &as : asteroidy) {
-           window.draw(*as);
+        window.draw(Gwiazdy);
+        auto as = Asteroidy.begin();
+        while (as!=Asteroidy.end()) {
+            Obiekty* asteroida = *as;
+            asteroida->animate(elapsed,kosmiczny,nullptr,false);
+            if (asteroida->isDead()||asteroida->getPosition().y>HEIGHT) {
+                delete asteroida;
+                as = Asteroidy.erase(as);
+            }
+            else {
+                window.draw(*asteroida);
+                as++;
+            }
         }
-
-
+        auto ro = Rockets.begin();
+        while(ro!=Rockets.end()) {
+            Obiekty* rocket = *ro;
+            rocket->animate(elapsed,kosmiczny,&Asteroidy,true);
+            if (rocket->isDead()||rocket->getPosition().y<50) {
+                delete rocket;
+                ro = Rockets.erase(ro);
+            }
+            else {
+                window.draw(*rocket);
+                ro++;
+            }
+        }
+        kosmiczny.draw(window);
         window.display();
     }
 
