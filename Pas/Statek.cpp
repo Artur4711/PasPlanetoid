@@ -4,7 +4,9 @@
 Statek::Statek(const std::string& file,
        std::map <std::string,sf::Image*>Images,
        std::map<std::string,sf::Texture*> Textures,
-       std::map<std::string,sf::VertexArray> beginCollisionPointsOfTextures) : Obiekty(file,Images,Textures,beginCollisionPointsOfTextures) {
+       std::map<std::string,sf::VertexArray> beginCollisionPointsOfTextures) : Obiekty(file,Images,Textures,beginCollisionPointsOfTextures)
+{
+//    setPosition(400/2,500-100);
 }
 
 void Statek::draw(sf::RenderWindow& window) {
@@ -79,7 +81,8 @@ void Statek::eventAnalysis(sf::Event& e,std::list <Obiekty*>&Asteroidy,
                    std::map<std::string,sf::VertexArray> beginCollisionPointsOfTextures){
     if((e.type==sf::Event::MouseButtonPressed && e.mouseButton.button == sf::Mouse::Left)||((e.type==sf::Event::KeyPressed&&e.key.code==sf::Keyboard::Space))) {
         if (Asteroidy.size()>300) return;
-            Asteroidy.push_back(new Obiekty("rakieta.png",Images,Textures,beginCollisionPointsOfTextures));
-            Asteroidy.back()->setPosition((int)trueCollisionPoints[13].position.x+5,  (int)trueCollisionPoints[13].position.y-50);
+            Asteroidy.push_back(new Obiekty("rakieta3.png",Images,Textures,beginCollisionPointsOfTextures));
+            Asteroidy.back()->setScale(0.1,0.1);
+            Asteroidy.back()->setPosition((int)trueCollisionPoints[1000].position.x+20,  (int)trueCollisionPoints[1000].position.y-100);
         }
 }

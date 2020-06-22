@@ -29,7 +29,7 @@ void Obiekty::loadCollisionPoints(const std::string& file,
                 }
             }
         }
-        bcpot[file]=beginCollisionPoints; /// dla tego Image zapamiętuje początkowe punkty kolizji (też jako mapa "file"->punkty kolizji)
+        bcpot[file]=beginCollisionPoints;
         txs[file]=new sf::Texture();
         txs[file]->loadFromImage(*images[file],sf::IntRect(0,0,images[file]->getSize().x, images[file]->getSize().y));
     } else {
