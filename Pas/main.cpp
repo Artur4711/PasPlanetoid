@@ -1,10 +1,13 @@
-#include <Obiekty.h>
+#include <Obiekt.h>
 #include <Statek.h>
+#include <Asteroida.h>
+#include <Powerup.h>
+#include <Rakieta.h>
 
 void ustaw_przeszkody(std::map <std::string,sf::Image*> &Images,
                       std::map<std::string,sf::Texture*> &Textures,
                       std::map<std::string,sf::VertexArray> &beginCollisionPointsOfTextures,
-                      std::list <Obiekty*> &Asteroidy,
+                      std::list <Obiekt*> &Obiekty,
                       sf::VertexArray &Gwiazdy, int WIDTH, int HEIGHT);
 
 Statek ustaw_statek(std::map <std::string,sf::Image*> &Images,
@@ -12,7 +15,7 @@ Statek ustaw_statek(std::map <std::string,sf::Image*> &Images,
                     std::map<std::string,sf::VertexArray> &beginCollisionPointsOfTextures,
                     int WIDTH, int HEIGHT);
 
-void kolizje(Statek &kosmiczny,std::list <Obiekty*> &Asteroidy);
+void kolizje(Statek &kosmiczny,std::list <Obiekt*> &Asteroidy);
 
 int main()
 {
@@ -22,10 +25,8 @@ int main()
     std::map <std::string,sf::Image*> Images;
     std::map<std::string,sf::Texture*> Textures;
     std::map<std::string,sf::VertexArray> beginCollisionPointsOfTextures;
-    std::list <Obiekty*> Rockets;
-    std::list <Obiekty*> Asteroidy;
+    std::list <Obiekt*> Obiekty;
     sf::VertexArray Gwiazdy(sf::PrimitiveType::Points,2000);
-
 
     sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Pas planetoid");
     window.setFramerateLimit(60);
@@ -33,10 +34,12 @@ int main()
     window.setVerticalSyncEnabled(true);
     window.setPosition(sf::Vector2i(0,0));
 
+    sf::Clock Rclock;
     sf::Clock clock;
+    sf::Clock reverseclock;
     std::map<int,bool> status;
 
-    ustaw_przeszkody(Images,Textures,beginCollisionPointsOfTextures,Asteroidy,Gwiazdy,WIDTH,HEIGHT);
+    ustaw_przeszkody(Images,Textures,beginCollisionPointsOfTextures,Obiekty,Gwiazdy,WIDTH,HEIGHT);
     auto kosmiczny = ustaw_statek(Images,Textures,beginCollisionPointsOfTextures,WIDTH,HEIGHT);
 
     sf::Event event;
@@ -47,15 +50,14 @@ int main()
             if (event.type == sf::Event::Closed || (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape) )) window.close();
             if (event.type==sf::Event::KeyPressed) status[event.key.code]=true;
             if (event.type==sf::Event::KeyReleased)status[event.key.code]=false;
-
-            kosmiczny.eventAnalysis(event,Rockets,Images,Textures,beginCollisionPointsOfTextures);
+            kosmiczny.eventAnalysis(event,Obiekty,Images,Textures,beginCollisionPointsOfTextures);
         }
 
     //LOGIC
         sf::Time elapsed = clock.restart();
         window.clear(sf::Color(20,20,50));
-        kolizje(kosmiczny,Asteroidy);
-        kosmiczny.animate(elapsed,status,Asteroidy);
+        kolizje(kosmiczny,Obiekty);
+        kosmiczny.animate(elapsed,status,Obiekty);
         for(auto i=0; i<Gwiazdy.getVertexCount();i++)
         {
             Gwiazdy[i].position.y+=1;
@@ -64,38 +66,27 @@ int main()
                 Gwiazdy[i].position.y=0;
             }
         }
+        if(kosmiczny.reverse){
+            if(Rclock.getElapsedTime().asSeconds()>5){
+                kosmiczny.reverse=false;
+            }
+        }
+        else Rclock.restart();
+
 
     //DRAW
         window.draw(Gwiazdy);
-        auto as = Asteroidy.begin();
-        while (as!=Asteroidy.end()) {
-            Obiekty* asteroida = *as;
-            asteroida->animate(elapsed,kosmiczny,nullptr,false);
-            if (asteroida->isDead()||asteroida->getPosition().y>HEIGHT) {
-                if(asteroida->getPosition().y>HEIGHT&&rand()%5+1==5){
-                    asteroida->setPosition(asteroida->getPosition().x,-100);
-                }
-                else{
-                delete asteroida;
-                as = Asteroidy.erase(as);
-                }
+        auto obj = Obiekty.begin();
+        while (obj!=Obiekty.end()) {
+            Obiekt* obiekt = *obj;
+            obiekt->animate(elapsed,kosmiczny,&Obiekty);
+            if (obiekt->isDead()||obiekt->getPosition().y>HEIGHT) {
+                delete obiekt;
+                obj = Obiekty.erase(obj);
             }
             else {
-                window.draw(*asteroida);
-                as++;
-            }
-        }
-        auto ro = Rockets.begin();
-        while(ro!=Rockets.end()) {
-            Obiekty* rocket = *ro;
-            rocket->animate(elapsed,kosmiczny,&Asteroidy,true);
-            if (rocket->isDead()||rocket->getPosition().y<50) {
-                delete rocket;
-                ro = Rockets.erase(ro);
-            }
-            else {
-                window.draw(*rocket);
-                ro++;
+                window.draw(*obiekt);
+                obj++;
             }
         }
         kosmiczny.draw(window);
@@ -107,20 +98,22 @@ int main()
 void ustaw_przeszkody(std::map <std::string,sf::Image*> &Images,
                     std::map<std::string,sf::Texture*> &Textures,
                     std::map<std::string,sf::VertexArray> &beginCollisionPointsOfTextures,
-                    std::list <Obiekty*> &Asteroidy,
+                    std::list <Obiekt*> &Obiekty,
                     sf::VertexArray &Gwiazdy, int WIDTH, int HEIGHT)
 {
     for (int j=0; j<50; j++) {
         for (int i=0; i<3; i++) {
-            Asteroidy.push_back(new Obiekty("asteroida.png",Images,Textures,beginCollisionPointsOfTextures));
-            Asteroidy.back()->setBounds(0,WIDTH,0,HEIGHT);
-            Asteroidy.back()->setSpeed(std::rand()%80-40,80,std::rand()%100-50);
-            Asteroidy.back()->setScale(1.0f + (rand()%41)/100.0 , 1.0f + (rand()%41)/100.0);
-            Asteroidy.back()->setPosition(-50+std::rand()%(HEIGHT+100),-200*j+100*i );
-            Asteroidy.back()->setColor(sf::Color(rand()%255,rand()%255,rand()%255,255));
+            Obiekty.push_back(new Asteroida("asteroida.png",Images,Textures,beginCollisionPointsOfTextures));
+            Obiekty.back()->setBounds(0,WIDTH,0,HEIGHT);
+            Obiekty.back()->setPosition(-50+std::rand()%(HEIGHT+100),-200*j+100*i );
+            if(rand()%15==7){
+                Obiekty.push_back(new Powerup("powerup.png",Images,Textures,beginCollisionPointsOfTextures));
+                Obiekty.back()->setPosition(-50+std::rand()%(HEIGHT+100),-200*j+100*i);
+            }
+
         }
     }
-    //gwiazdy
+    //gwiazdy w tle
     for (auto i = 0u; i<Gwiazdy.getVertexCount(); i++) {
         Gwiazdy[i].position = sf::Vector2f(rand()%WIDTH,rand()%HEIGHT);
         Gwiazdy[i].color = sf::Color(rand()%156+100,rand()%156+100,rand()%156+100,255);
@@ -139,7 +132,7 @@ Statek ustaw_statek(std::map <std::string,sf::Image*> &Images,
     return statek;
 }
 
-void kolizje(Statek &kosmiczny,std::list <Obiekty*> &Asteroidy)
+void kolizje(Statek &kosmiczny,std::list <Obiekt*> &Asteroidy) //służy tylko do odpowiedzi na udeżenie
 {
     sf::FloatRect statek_b = kosmiczny.getGlobalBounds();
     for (auto as : Asteroidy){

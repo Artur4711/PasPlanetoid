@@ -12,28 +12,27 @@
 class Statek;
 
 
-class Obiekty : public sf::Sprite {
+class Obiekt : public sf::Sprite {
 
 public:
-    Obiekty(const std::string& file,
+    Obiekt(const std::string& file,
           std::map <std::string,sf::Image*> Images,
           std::map<std::string,sf::Texture*> Textures,
           std::map<std::string,sf::VertexArray> beginCollisionPointsOfTextures);
     void setSpeed(int vel_x,int vel_y, int vel_r);
-    void animate(const sf::Time &elapsed,Statek& statek,std::list<Obiekty*>* collisionList=nullptr,bool isRocket=false);
+    virtual void animate(const sf::Time &elapsed,Statek& statek,std::list<Obiekt*>* collisionList=nullptr);
     void setBounds(int left,int right,int top, int bot);
     void calcTrueCP();
-    bool isDead() { return this->toKill; }
+    bool isDead() { return this->toKill;}
     bool canCollide();
     void draw(sf::RenderWindow& window);
-    template <typename T>bool isCollision(T* object);
+    bool isCollision(Obiekt* object);
     bool top_left = false;
     bool top_right = false;
     bool bot_left = false;
     bool bot_right = false;
-    int vel_x;
-    int vel_y;
-    int vel_r;
+    int boost=1;
+    bool toKill=false;
 protected:
     void bounce();
     void loadCollisionPoints(const std::string& file,
@@ -49,5 +48,7 @@ protected:
     int bot;
     int width;
     int height;
-    bool toKill;
+    int vel_x;
+    int vel_y;
+    int vel_r;
 };

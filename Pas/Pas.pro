@@ -4,7 +4,10 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-        Obiekty.cpp \
+        Asteroida.cpp \
+        Obiekt.cpp \
+        Powerup.cpp \
+        Rakieta.cpp \
         Statek.cpp \
         main.cpp
 
@@ -17,5 +20,8 @@ CONFIG(debug, debug|release){
 }
 
 HEADERS += \
-    Obiekty.h \
+    Asteroida.h \
+    Obiekt.h \
+    Powerup.h \
+    Rakieta.h \
     Statek.h

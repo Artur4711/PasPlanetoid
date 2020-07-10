@@ -1,6 +1,6 @@
-#include <Obiekty.h>
+#include <Obiekt.h>
 
-Obiekty::Obiekty(const std::string& file,
+Obiekt::Obiekt(const std::string& file,
                 std::map <std::string,sf::Image*> Images,
                 std::map<std::string,sf::Texture*> Textures,
                 std::map<std::string,sf::VertexArray> beginCollisionPointsOfTextures) {
@@ -10,7 +10,7 @@ Obiekty::Obiekty(const std::string& file,
     loadCollisionPoints(file,Images,Textures,beginCollisionPointsOfTextures);
 }
 
-void Obiekty::loadCollisionPoints(const std::string& file,
+void Obiekt::loadCollisionPoints(const std::string& file,
                 std::map<std::string,sf::Image*>& images,
                 std::map<std::string,sf::Texture*>& txs,
                 std::map<std::string,sf::VertexArray>& bcpot)
@@ -25,7 +25,7 @@ void Obiekty::loadCollisionPoints(const std::string& file,
                 if (c.r==c.g and c.g==c.b and c.b==255) {
                     beginCollisionPoints.append(sf::Vertex(sf::Vector2f(i+getPosition().x,j+getPosition().y)));
                     trueCollisionPoints.append(sf::Vertex(sf::Vector2f(i+getPosition().x,j+getPosition().y)));
-                    images[file]->setPixel(i,j,sf::Color(40,40,40,0));
+                    images[file]->setPixel(i,j,sf::Color(255,255,255,0));
                 }
             }
         }
@@ -43,43 +43,20 @@ void Obiekty::loadCollisionPoints(const std::string& file,
     setTexture(*txs[file]);
 }
 
-float Obiekty::iloczyn_wektorowy(sf::Vector2f& A, sf::Vector2f& B, sf::Vector2f& C)
+float Obiekt::iloczyn_wektorowy(sf::Vector2f& A, sf::Vector2f& B, sf::Vector2f& C)
 {
 int x1 = C.x - A.x, y1 = C.y - A.y;
 int x2 = B.x - A.x, y2 = B.y - A.y;
 return x1*y2 - x2*y1;
 }
-
-void Obiekty::draw(sf::RenderWindow& window)
+void Obiekt::draw(sf::RenderWindow& window)
 {
     window.draw(*this);
-    window.draw(trueCollisionPoints);
+    //window.draw(trueCollisionPoints);
     //tu ewentualne animacje
 }
 
-void Obiekty::animate(const sf::Time &elapsed, Statek& statek, std::list<Obiekty*>* collisionList,bool isRocket)
-{
-    if(isRocket){
-        move(0,-200*elapsed.asSeconds());
-    }else{
-        move(vel_x*elapsed.asSeconds(),vel_y*elapsed.asSeconds());
-        rotate(vel_r*elapsed.asSeconds());
-        bounce();
-    }
-    calcTrueCP();
-    if (collisionList!=nullptr) {
-        for (auto elem : *collisionList) {
-            if (this==elem) continue;
-            if(isCollision(elem)) {
-             elem->toKill=true;
-             this->toKill=true;
-             return;
-            }
-        }
-    }
-}
-
-template <typename T>bool Obiekty::isCollision(T* object )
+bool Obiekt::isCollision(Obiekt* object )
 {
     if (getGlobalBounds().intersects(object->getGlobalBounds())) {
         for (auto i=0u; i<trueCollisionPoints.getVertexCount()-1; i++) {
@@ -96,20 +73,23 @@ template <typename T>bool Obiekty::isCollision(T* object )
     }
     return false;
 }
+void Obiekt::animate(const sf::Time &elapsed, Statek& statek, std::list<Obiekt*>* collisionList)
+{
+}
 
-void Obiekty::calcTrueCP() {
+void Obiekt::calcTrueCP() {
     for (unsigned i=0; i<beginCollisionPoints.getVertexCount(); i++) {
         trueCollisionPoints[i].position= getTransform().transformPoint(beginCollisionPoints[i].position);
     }
 }
 
-void Obiekty::setBounds(int left,int right,int top, int bot)
+void Obiekt::setBounds(int left,int right,int top, int bot)
 {
     this->left = left;   this->right = right;
     this->top = top;     this->bot = bot;
 }
 
-void Obiekty::bounce()
+void Obiekt::bounce()
 {
     sf::FloatRect przeszkoda = getGlobalBounds();
     if ((przeszkoda.left <= this->left && vel_x<0)||(przeszkoda.left+przeszkoda.width >=this->right && vel_x>0))
@@ -118,7 +98,7 @@ void Obiekty::bounce()
     }
 }
 
-void Obiekty::setSpeed(int velx,int vely, int velr)
+void Obiekt::setSpeed(int velx,int vely, int velr)
 {
     vel_r=velr;   vel_x=velx;   vel_y=vely;
 }
