@@ -1,8 +1,6 @@
 #include <Obiekt.h>
 #include <Statek.h>
-#include <Asteroida.h>
-#include <Powerup.h>
-#include <Rakieta.h>
+
 
 void ustaw_przeszkody(std::map <std::string,sf::Image*> &Images,
                       std::map<std::string,sf::Texture*> &Textures,
@@ -21,6 +19,7 @@ int main()
 {
     int HEIGHT=1080;
     int WIDTH=1920;
+    bool boss=false;
 
     std::map <std::string,sf::Image*> Images;
     std::map<std::string,sf::Texture*> Textures;
@@ -34,9 +33,10 @@ int main()
     window.setVerticalSyncEnabled(true);
     window.setPosition(sf::Vector2i(0,0));
 
-    sf::Clock Rclock;
     sf::Clock clock;
-    sf::Clock reverseclock;
+    sf::Clock Speedupclock;
+    sf::Clock Reloadclock;
+    sf::Clock Reverseclock;
     std::map<int,bool> status;
 
     ustaw_przeszkody(Images,Textures,beginCollisionPointsOfTextures,Obiekty,Gwiazdy,WIDTH,HEIGHT);
@@ -54,24 +54,48 @@ int main()
         }
 
     //LOGIC
+        if (kosmiczny.shoot){
+            Obiekty.push_back(new Asteroida("asteroida.png",Images,Textures,beginCollisionPointsOfTextures));
+            Obiekty.back()->setBounds(0,WIDTH,0,HEIGHT);
+            Obiekty.back()->setPosition(kosmiczny.posBoss.x,kosmiczny.posBoss.y);
+            Obiekty.back()->setSpeed(0,200,0);
+        }
+        if(Obiekty.size()==0&&boss==false){
+            Obiekty.push_back(new Boss("boss.png",Images, Textures, beginCollisionPointsOfTextures));
+            Obiekty.back()->setPosition(WIDTH/2,200);
+            Obiekty.back()->setBounds(0,WIDTH,0,HEIGHT);
+            boss=true;
+        }
         sf::Time elapsed = clock.restart();
         window.clear(sf::Color(20,20,50));
         kolizje(kosmiczny,Obiekty);
         kosmiczny.animate(elapsed,status,Obiekty);
         for(auto i=0; i<Gwiazdy.getVertexCount();i++)
         {
-            Gwiazdy[i].position.y+=1;
+            if(kosmiczny.speedup)Gwiazdy[i].position.y+=3;
+            else Gwiazdy[i].position.y++;
             if(Gwiazdy[i].position.y>HEIGHT)
             {
                 Gwiazdy[i].position.y=0;
             }
         }
         if(kosmiczny.reverse){
-            if(Rclock.getElapsedTime().asSeconds()>5){
+            if(Reverseclock.getElapsedTime().asSeconds()>5){
                 kosmiczny.reverse=false;
             }
         }
-        else Rclock.restart();
+        else Reverseclock.restart();
+        if(kosmiczny.speedup){
+            if(Speedupclock.getElapsedTime().asSeconds()>10){
+                kosmiczny.speedup=false;
+            }
+        }
+        else Speedupclock.restart();
+        if(Reloadclock.getElapsedTime().asSeconds()>3){
+            kosmiczny.rakiet--;
+            kosmiczny.booster+=5;
+            Reloadclock.restart();
+        }
 
 
     //DRAW
@@ -101,7 +125,7 @@ void ustaw_przeszkody(std::map <std::string,sf::Image*> &Images,
                     std::list <Obiekt*> &Obiekty,
                     sf::VertexArray &Gwiazdy, int WIDTH, int HEIGHT)
 {
-    for (int j=0; j<50; j++) {
+    for (int j=0; j<1; j++) {
         for (int i=0; i<3; i++) {
             Obiekty.push_back(new Asteroida("asteroida.png",Images,Textures,beginCollisionPointsOfTextures));
             Obiekty.back()->setBounds(0,WIDTH,0,HEIGHT);
@@ -110,7 +134,6 @@ void ustaw_przeszkody(std::map <std::string,sf::Image*> &Images,
                 Obiekty.push_back(new Powerup("powerup.png",Images,Textures,beginCollisionPointsOfTextures));
                 Obiekty.back()->setPosition(-50+std::rand()%(HEIGHT+100),-200*j+100*i);
             }
-
         }
     }
     //gwiazdy w tle
@@ -127,7 +150,6 @@ Statek ustaw_statek(std::map <std::string,sf::Image*> &Images,
 {
     Statek statek("statek2.png",Images, Textures,beginCollisionPointsOfTextures);
     statek.setPosition(WIDTH/2,HEIGHT-100);
-    statek.setScale(0.1,0.1);
     statek.setBounds(0,WIDTH,0,HEIGHT);
     return statek;
 }

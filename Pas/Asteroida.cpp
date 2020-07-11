@@ -11,53 +11,25 @@ Asteroida::Asteroida(const std::string& file,
 }
 void Asteroida::animate(const sf::Time &elapsed, Statek& statek, std::list<Obiekt*>* collisionList)
 {
-    move(vel_x*elapsed.asSeconds(),vel_y*elapsed.asSeconds());
+    if(statek.speedup)Sboost=80;
+    else Sboost=0;
+    if(vel_x>0)move((vel_x+Sboost/2+statek.booster)*elapsed.asSeconds(),(vel_y+Sboost+statek.booster)*elapsed.asSeconds());
+    else move((vel_x-Sboost/2-statek.booster)*elapsed.asSeconds(),(vel_y+Sboost+statek.booster)*elapsed.asSeconds());
     rotate(vel_r*elapsed.asSeconds());
     bounce();
     calcTrueCP();
     if (collisionList!=nullptr) {
         for (auto elem : *collisionList) {
-            if (this==dynamic_cast<Asteroida*>(elem)) continue;
-            if(isCollision(elem)) {
-                if(top_right&&bot_right){
-                    move(-2000*elapsed.asSeconds(),0);
-                    elem->move(2000*elapsed.asSeconds(),0);
-                    top_right=false;
-                    bot_right=false;
+            if (!(dynamic_cast<Asteroida*>(elem))){
+
+            }
+            else{
+                if(isCollision(elem)) {
+                    vel_y=-vel_y;
+                    vel_x=-vel_x;
+                    elem->setSpeed(-vel_x,-vel_y,30);
+                    return;
                 }
-                if(top_left&&top_right){
-                    move(0,2000*elapsed.asSeconds());
-                    elem->move(0,-2000*elapsed.asSeconds());
-                    top_left=false;
-                    top_right=false;
-                }
-                if(top_left&&bot_left){
-                    move(2000*elapsed.asSeconds(),0);
-                    elem->move(-2000*elapsed.asSeconds(),0);
-                    top_left=false;
-                    bot_left=false;
-                }
-                if(top_left){
-                    move(2000*elapsed.asSeconds(),2000*elapsed.asSeconds());
-                    elem->move(-2000*elapsed.asSeconds(),-2000*elapsed.asSeconds());
-                    top_left=false;
-                }
-                if(top_right){
-                    move(-2000*elapsed.asSeconds(),2000*elapsed.asSeconds());
-                    elem->move(2000*elapsed.asSeconds(),-2000*elapsed.asSeconds());
-                    top_right=false;
-                }
-                if(bot_left){
-                    move(2000*elapsed.asSeconds(),-2000*elapsed.asSeconds());
-                    elem->move(-2000*elapsed.asSeconds(),2000*elapsed.asSeconds());
-                    bot_left=false;
-                }
-                if(bot_right){
-                    move(-2000*elapsed.asSeconds(),-2000*elapsed.asSeconds());
-                    elem->move(2000*elapsed.asSeconds(),2000*elapsed.asSeconds());
-                    bot_right=false;
-                }
-             return;
             }
         }
     }

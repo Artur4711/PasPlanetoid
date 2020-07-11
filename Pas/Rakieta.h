@@ -1,7 +1,5 @@
 #pragma once
 #include <Obiekt.h>
-#include <Statek.h>
-
 
 class Rakieta : public Obiekt {
 public:

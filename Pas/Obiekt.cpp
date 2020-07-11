@@ -92,6 +92,10 @@ void Obiekt::setBounds(int left,int right,int top, int bot)
 void Obiekt::bounce()
 {
     sf::FloatRect przeszkoda = getGlobalBounds();
+    if ((przeszkoda.top <= -1000 && vel_y<0))
+    {
+        vel_y=-vel_y;
+    }
     if ((przeszkoda.left <= this->left && vel_x<0)||(przeszkoda.left+przeszkoda.width >=this->right && vel_x>0))
     {
         vel_x=-vel_x;

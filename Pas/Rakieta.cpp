@@ -18,14 +18,11 @@ void Rakieta::animate(const sf::Time &elapsed, Statek &statek, std::list<Obiekt*
             if(isCollision(elem)) {
              elem->toKill=true;
              this->toKill=true;
-             statek.rakiet--;
              return;
             }
         }
     }
     if(getPosition().y<100){
         this->toKill=true;
-        statek.rakiet--;
-
     }
 }

@@ -6,6 +6,8 @@ Statek::Statek(const std::string& file,
        std::map<std::string,sf::Texture*> Textures,
        std::map<std::string,sf::VertexArray> beginCollisionPointsOfTextures) : Obiekt(file,Images,Textures,beginCollisionPointsOfTextures)
 {
+    setScale(0.1,0.1);
+    setOrigin((getGlobalBounds().width)/2,(getGlobalBounds().height)/2);
 }
 
 void Statek::draw(sf::RenderWindow& window) {
@@ -76,40 +78,49 @@ void Statek::animate(sf::Time elapsed,std::map<int,bool>& status,std::list <Obie
                 if(dynamic_cast<Powerup*>(obj)->nr==1){
                     reverse=true;
                 }
+                if(dynamic_cast<Powerup*>(obj)->nr==2){
+                    speedup=true;
+                }
+                if(dynamic_cast<Powerup*>(obj)->nr==3){
+                    rocketlimit++;
+                }
                 obj->toKill=true;
+            }
+            if(dynamic_cast<Boss*>(obj)){
+                setPosition(obj->getPosition().x,getPosition().y+200);
             }
             else{
                 if(top_right&&bot_right){
-                    move(-300*elapsed.asSeconds(),0);
-                    obj->setSpeed(150,0,0);
+                    move(-400*elapsed.asSeconds(),0);
+                    obj->setSpeed(120,0,0);
                 }
                 if(top_left&&top_right){
-                    move(0,300*elapsed.asSeconds());
-                    obj->setSpeed(0,-150,-30);
+                    move(0,400*elapsed.asSeconds());
+                    obj->setSpeed(0,-120,-30);
                 }
                 if(top_left&&bot_left){
-                    move(300*elapsed.asSeconds(),0);
-                    obj->setSpeed(-150,0,0);
+                    move(400*elapsed.asSeconds(),0);
+                    obj->setSpeed(-120,0,0);
                 }
                 if(bot_right&&bot_left){
-                    move(0,-300*elapsed.asSeconds());
-                    obj->setSpeed(0,150,0);
+                    move(0,-400*elapsed.asSeconds());
+                    obj->setSpeed(0,120,0);
                 }
                 if(top_left){
-                    move(300*elapsed.asSeconds(),300*elapsed.asSeconds());
-                    obj->setSpeed(-150,-150,-30);
+                    move(400*elapsed.asSeconds(),400*elapsed.asSeconds());
+                    obj->setSpeed(-120,-120,-30);
                 }
                 if(top_right){
-                    move(-300*elapsed.asSeconds(),300*elapsed.asSeconds());
+                    move(-400*elapsed.asSeconds(),400*elapsed.asSeconds());
                     obj->setSpeed(150,-150,-30);
                 }
                 if(bot_left){
-                    move(300*elapsed.asSeconds(),-300*elapsed.asSeconds());
-                    obj->setSpeed(-150,150,30);
+                    move(400*elapsed.asSeconds(),-400*elapsed.asSeconds());
+                    obj->setSpeed(-120,120,30);
                 }
                 if(bot_right){
-                    move(-300*elapsed.asSeconds(),-300*elapsed.asSeconds());
-                    obj->setSpeed(150,150,30);
+                    move(-400*elapsed.asSeconds(),-400*elapsed.asSeconds());
+                    obj->setSpeed(120,120,30);
                 }
                 top_right=false;
                 bot_right=false;

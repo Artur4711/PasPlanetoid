@@ -5,6 +5,7 @@ CONFIG -= qt
 
 SOURCES += \
         Asteroida.cpp \
+        Boss.cpp \
         Obiekt.cpp \
         Powerup.cpp \
         Rakieta.cpp \
@@ -21,6 +22,7 @@ CONFIG(debug, debug|release){
 
 HEADERS += \
     Asteroida.h \
+    Boss.h \
     Obiekt.h \
     Powerup.h \
     Rakieta.h \

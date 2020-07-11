@@ -1,5 +1,6 @@
 #pragma once
 #include <Obiekt.h>
+#include <Statek.h>
 
 class Asteroida : public Obiekt {
 public:
@@ -8,5 +9,5 @@ public:
            std::map<std::string,sf::Texture*> Textures,
            std::map<std::string,sf::VertexArray> beginCollisionPointsOfTextures);
     void animate(const sf::Time &elapsed, Statek& statek, std::list<Obiekt*>* collisionList);
-
+    int Sboost;
 };
