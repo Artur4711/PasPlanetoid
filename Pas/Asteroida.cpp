@@ -25,8 +25,10 @@ void Asteroida::animate(const sf::Time &elapsed, Statek& statek, std::list<Obiek
             }
             else{
                 if(isCollision(elem)) {
-                    vel_y=-vel_y;
+                    if(rand()%5==1){
+                    vel_y=abs(vel_y);
                     vel_x=-vel_x;
+                    }
                     elem->setSpeed(-vel_x,-vel_y,30);
                     return;
                 }

@@ -15,4 +15,5 @@ public:
     int moves=0;
     bool atak=false;
     sf::Time t1;
+
 };

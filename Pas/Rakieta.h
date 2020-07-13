@@ -1,4 +1,5 @@
 #pragma once
+#include <Boss.h>
 #include <Obiekt.h>
 
 class Rakieta : public Obiekt {

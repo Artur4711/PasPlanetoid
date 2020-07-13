@@ -24,48 +24,48 @@ void Statek::animate(sf::Time elapsed,std::map<int,bool>& status,std::list <Obie
         if(reverse){
             setSpeed(-100,0,0);
             move((vel_x-boost)*elapsed.asSeconds(),vel_y*elapsed.asSeconds());
-            if(boost<100)boost++;
+            if(boost<200)boost++;
         }
         else {
             setSpeed(100,0,0);
             move((vel_x+boost)*elapsed.asSeconds(),vel_y*elapsed.asSeconds());
-            if(boost<100)boost++;
+            if(boost<200)boost++;
         }
     }
     if(status[sf::Keyboard::A]&&this->left<=statek.left) {
         if(reverse){
             setSpeed(100,0,0);
             move((vel_x+boost)*elapsed.asSeconds(),vel_y*elapsed.asSeconds());
-            if(boost<100)boost++;
+            if(boost<200)boost++;
         }
         else {
             setSpeed(-100,0,0);
             move((vel_x-boost)*elapsed.asSeconds(),vel_y*elapsed.asSeconds());
-            if(boost<100)boost++;
+            if(boost<200)boost++;
         }
     }
     if(status[sf::Keyboard::W]&&this->top<=statek.top) {
         if(reverse){
             setSpeed(0,100,0);
             move(vel_x*elapsed.asSeconds(),(vel_y+boost)*elapsed.asSeconds());
-            if(boost<100)boost++;
+            if(boost<200)boost++;
         }
         else{
             setSpeed(0,-100,0);
             move(vel_x*elapsed.asSeconds(),(vel_y-boost)*elapsed.asSeconds());
-            if(boost<100)boost++;
+            if(boost<200)boost++;
         }
     }
     if(status[sf::Keyboard::S]&&this->bot>=statek.top+statek.height) {
         if(reverse){
             setSpeed(0,-100,0);
             move(vel_x*elapsed.asSeconds(),(vel_y-boost)*elapsed.asSeconds());
-            if(boost<100)boost++;
+            if(boost<200)boost++;
         }
         else {
             setSpeed(0,100,0);
             move(vel_x*elapsed.asSeconds(),(vel_y+boost)*elapsed.asSeconds());
-            if(boost<100)boost++;
+            if(boost<200)boost++;
         }
     }
     if(!(status[sf::Keyboard::S]||status[sf::Keyboard::W]||status[sf::Keyboard::A]||status[sf::Keyboard::D])){
@@ -88,8 +88,9 @@ void Statek::animate(sf::Time elapsed,std::map<int,bool>& status,std::list <Obie
             }
             if(dynamic_cast<Boss*>(obj)){
                 setPosition(obj->getPosition().x,getPosition().y+200);
+                hp-=100;
             }
-            else{
+            if(dynamic_cast<Asteroida*>(obj)){
                 if(top_right&&bot_right){
                     move(-400*elapsed.asSeconds(),0);
                     obj->setSpeed(120,0,0);
@@ -122,6 +123,7 @@ void Statek::animate(sf::Time elapsed,std::map<int,bool>& status,std::list <Obie
                     move(-400*elapsed.asSeconds(),-400*elapsed.asSeconds());
                     obj->setSpeed(120,120,30);
                 }
+                hp-=30;
                 top_right=false;
                 bot_right=false;
                 top_left=false;

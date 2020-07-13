@@ -25,6 +25,8 @@ public:
     int booster=1;
     bool shoot=false;
     sf::Vector2f posBoss;
+    int hp=300;
+    int bosshp=900;
 protected:
 };
 

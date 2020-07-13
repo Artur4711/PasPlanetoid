@@ -13,6 +13,9 @@ Boss::Boss(const std::string& file,
 }
 void Boss::animate(const sf::Time &elapsed, Statek& statek, std::list<Obiekt*>* collisionList)
 {
+    if(statek.bosshp<0){
+        this->toKill=true;
+    }
     t1+=elapsed;
     if(t1>sf::seconds(2)){
         statek.shoot=true;

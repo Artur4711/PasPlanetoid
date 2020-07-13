@@ -14,11 +14,16 @@ void Rakieta::animate(const sf::Time &elapsed, Statek &statek, std::list<Obiekt*
     calcTrueCP();
     if (collisionList!=nullptr) {
         for (auto elem : *collisionList) {
-            if (this==elem) continue;
             if(isCollision(elem)) {
-             elem->toKill=true;
-             this->toKill=true;
-             return;
+                if(dynamic_cast<Boss*>(elem)){
+                   statek.bosshp-=100;
+                   std::cout<<statek.bosshp<<std::endl;
+                   this->toKill=true;
+                }
+                else{
+                 elem->toKill=true;
+                 this->toKill=true;
+                }
             }
         }
     }

@@ -20,18 +20,21 @@ int main()
     int HEIGHT=1080;
     int WIDTH=1920;
     bool boss=false;
+    bool end=false;
 
     std::map <std::string,sf::Image*> Images;
     std::map<std::string,sf::Texture*> Textures;
     std::map<std::string,sf::VertexArray> beginCollisionPointsOfTextures;
     std::list <Obiekt*> Obiekty;
+    std::list <sf::RectangleShape*> Rakiety;
     sf::VertexArray Gwiazdy(sf::PrimitiveType::Points,2000);
 
-    sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Pas planetoid");
+    sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Pas planetoid", sf::Style::Fullscreen);
     window.setFramerateLimit(60);
     window.setKeyRepeatEnabled(false);
     window.setVerticalSyncEnabled(true);
     window.setPosition(sf::Vector2i(0,0));
+    window.setMouseCursorVisible(false);
 
     sf::Clock clock;
     sf::Clock Speedupclock;
@@ -43,7 +46,7 @@ int main()
     auto kosmiczny = ustaw_statek(Images,Textures,beginCollisionPointsOfTextures,WIDTH,HEIGHT);
 
     sf::Event event;
-    while (window.isOpen()) {
+    while (window.isOpen()&&kosmiczny.hp>0&&!end) {
 
     //EVENTS
         while (window.pollEvent(event)) {
@@ -57,14 +60,30 @@ int main()
         if (kosmiczny.shoot){
             Obiekty.push_back(new Asteroida("asteroida.png",Images,Textures,beginCollisionPointsOfTextures));
             Obiekty.back()->setBounds(0,WIDTH,0,HEIGHT);
-            Obiekty.back()->setPosition(kosmiczny.posBoss.x,kosmiczny.posBoss.y);
+            Obiekty.back()->setScale(0.6,0.6);
+            Obiekty.back()->setPosition(kosmiczny.posBoss.x-550,kosmiczny.posBoss.y-300);
+            Obiekty.back()->setSpeed(0,200,0);
+            Obiekty.push_back(new Asteroida("asteroida.png",Images,Textures,beginCollisionPointsOfTextures));
+            Obiekty.back()->setBounds(0,WIDTH,0,HEIGHT);
+            Obiekty.back()->setScale(0.5,0.5);
+            Obiekty.back()->setPosition(kosmiczny.posBoss.x-900,kosmiczny.posBoss.y-380);
+            Obiekty.back()->setSpeed(0,200,0);
+            Obiekty.push_back(new Asteroida("asteroida.png",Images,Textures,beginCollisionPointsOfTextures));
+            Obiekty.back()->setBounds(0,WIDTH,0,HEIGHT);
+            Obiekty.back()->setScale(0.5,0.5);
+            Obiekty.back()->setPosition(kosmiczny.posBoss.x-100,kosmiczny.posBoss.y-380);
             Obiekty.back()->setSpeed(0,200,0);
         }
-        if(Obiekty.size()==0&&boss==false){
+        if(Obiekty.size()<=5&&boss==false){
             Obiekty.push_back(new Boss("boss.png",Images, Textures, beginCollisionPointsOfTextures));
             Obiekty.back()->setPosition(WIDTH/2,200);
             Obiekty.back()->setBounds(0,WIDTH,0,HEIGHT);
             boss=true;
+        }
+        if(boss==true&&kosmiczny.bosshp<=0){
+                  end=true;
+                  Obiekty.clear();
+                  std::cout<<"Wygrana"<<std::endl;
         }
         sf::Time elapsed = clock.restart();
         window.clear(sf::Color(20,20,50));
@@ -91,11 +110,32 @@ int main()
             }
         }
         else Speedupclock.restart();
-        if(Reloadclock.getElapsedTime().asSeconds()>3){
+        if(Reloadclock.getElapsedTime().asSeconds()>1&&kosmiczny.rakiet>0){
             kosmiczny.rakiet--;
-            kosmiczny.booster+=5;
+            kosmiczny.booster+=2;
             Reloadclock.restart();
         }
+        if(kosmiczny.rakiet==0&&Reloadclock.getElapsedTime().asSeconds()>1){
+            kosmiczny.booster+=2;
+            Reloadclock.restart();
+        }
+        sf::RectangleShape HP(sf::Vector2f(kosmiczny.hp,30));
+        HP.setFillColor(sf::Color::Yellow);
+        HP.setPosition(0,HEIGHT-30);
+        sf::RectangleShape HPfull(sf::Vector2f(300,30));
+        HPfull.setPosition(0,HEIGHT-30);
+        HPfull.setFillColor(sf::Color::Magenta);
+        for(int i=0;i<kosmiczny.rocketlimit;i++){
+            Rakiety.push_back(new sf::RectangleShape(sf::Vector2f(30,70)));
+            Rakiety.back()->setFillColor(sf::Color::Blue);
+            Rakiety.back()->setPosition(WIDTH-50-(i*50),HEIGHT-50);
+        }
+            for(int i=0;i<kosmiczny.rakiet;i++){
+                Rakiety.push_back(new sf::RectangleShape(sf::Vector2f(30,70)));
+                Rakiety.back()->setFillColor(sf::Color::Red);
+                Rakiety.back()->setPosition(WIDTH-50-(i*50),HEIGHT-50);
+            }
+
 
 
     //DRAW
@@ -113,7 +153,25 @@ int main()
                 obj++;
             }
         }
+
         kosmiczny.draw(window);
+        for (auto el:Rakiety){
+            window.draw(*el);
+        }
+        if(boss==true){
+            sf::RectangleShape HPboss(sf::Vector2f(kosmiczny.bosshp,30));
+            HPboss.setFillColor(sf::Color::Cyan);
+            HPboss.setPosition(500,30);
+            sf::RectangleShape HPbossfull(sf::Vector2f(900,30));
+            HPbossfull.setFillColor(sf::Color::Magenta);
+            HPbossfull.setPosition(500,30);
+            window.draw(HPbossfull);
+            if(kosmiczny.bosshp>0){
+                window.draw(HPboss);
+            }
+        }
+        window.draw(HPfull);
+        window.draw(HP);
         window.display();
     }
 
@@ -125,11 +183,11 @@ void ustaw_przeszkody(std::map <std::string,sf::Image*> &Images,
                     std::list <Obiekt*> &Obiekty,
                     sf::VertexArray &Gwiazdy, int WIDTH, int HEIGHT)
 {
-    for (int j=0; j<1; j++) {
+    for (int j=0; j<40; j++) {
         for (int i=0; i<3; i++) {
             Obiekty.push_back(new Asteroida("asteroida.png",Images,Textures,beginCollisionPointsOfTextures));
             Obiekty.back()->setBounds(0,WIDTH,0,HEIGHT);
-            Obiekty.back()->setPosition(-50+std::rand()%(HEIGHT+100),-200*j+100*i );
+            Obiekty.back()->setPosition(-50+std::rand()%(HEIGHT+100),-350*j+100*i );
             if(rand()%15==7){
                 Obiekty.push_back(new Powerup("powerup.png",Images,Textures,beginCollisionPointsOfTextures));
                 Obiekty.back()->setPosition(-50+std::rand()%(HEIGHT+100),-200*j+100*i);

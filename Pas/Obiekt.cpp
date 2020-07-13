@@ -94,7 +94,7 @@ void Obiekt::bounce()
     sf::FloatRect przeszkoda = getGlobalBounds();
     if ((przeszkoda.top <= -1000 && vel_y<0))
     {
-        vel_y=-vel_y;
+        vel_y=200;
     }
     if ((przeszkoda.left <= this->left && vel_x<0)||(przeszkoda.left+przeszkoda.width >=this->right && vel_x>0))
     {

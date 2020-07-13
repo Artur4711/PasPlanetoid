@@ -33,6 +33,7 @@ public:
     bool bot_right = false;
     int boost=1;
     bool toKill=false;
+    int hp =60;
 protected:
     void bounce();
     void loadCollisionPoints(const std::string& file,
